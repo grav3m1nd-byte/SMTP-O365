@@ -9,34 +9,33 @@ def main():
     print("Office365 Email Sender Program\n")
     print("\nPlease enter your credentials:\n")
 
-    smtpADDR = "smtp.office365.com"
+    smtp_addr = "smtp.office365.com"
+
+    error_header = "ERROR: "
+    exit_msg = "Exiting!"
 
     try:
         user = check_email_contains(input("Username: "))
-        pwdEnc = base64.b64encode(getpass.getpass().encode('UTF-8')).decode('ascii')
+        pwd_enc = base64.b64encode(getpass.getpass().encode('UTF-8')).decode('ascii')
         sendto = check_rcpt(int(input("\nNumber of Recipient(s): ")))
         subject = input("\nSubject: ")
         body = input("Message: ")
 
     except Exception as error:
-        print("\nERROR: ")
-        print(error)
-        print("\nExiting!")
+        print("\n" + error_header + error + "\n" + exit_msg)
 
     else:
         try:
             # Connecting to Office 365
-            smtpServer = smtplib.SMTP(smtpADDR, 587)
+            smtp_server = smtplib.SMTP(smtp_addr, 587)
 
-            smtpServer.ehlo()
-            smtpServer.starttls()
-            smtpServer.ehlo
-            smtpServer.login(user, base64.b64decode(pwdEnc.encode('ascii')).decode('UTF-8'))
+            smtp_server.ehlo()
+            smtp_server.starttls()
+            smtp_server.ehlo
+            smtp_server.login(user, base64.b64decode(pwd_enc.encode('ascii')).decode('UTF-8'))
 
         except smtplib.SMTPException as error:
-            print("\nERROR: ")
-            print(error)
-            print("\nExiting!")
+            print("\n" + error_header + error + "\n" + exit_msg)
 
         else:
             try:
@@ -47,16 +46,14 @@ def main():
                 print("\nVerify your email:\n" + header + "Message:\n" + body)
 
                 msgbody = header + "\n" + body + "\n\n"
-                smtpServer.sendmail(user, sendto, msgbody)
+                smtp_server.sendmail(user, sendto, msgbody)
 
             except smtplib.SMTPException as error:
-                print("\nERROR: ")
-                print(error)
-                print("\nExiting!")
+                print("\n" + error_header + error + "\n" + exit_msg)
 
             else:
                 print("\nDone!")
-                smtpServer.close()
+                smtp_server.close()
 
 
 def check_email_contains(email_address="test@domain.com", min_length=6):
@@ -76,9 +73,10 @@ def check_email_contains(email_address="test@domain.com", min_length=6):
 
 
 def check_rcpt(max_rcpt=1):
-    rcp_list = [check_email_contains(input("Provide recipient: "))]
-    for i in range(1, max_rcpt):  # for(i = 1, i < max_rcpt, i += 1)
+    i = 0
+    while i < max_rcpt:
         rcp_list.append(check_email_contains(input("Provide recipient: ")))
+        i += 1
     rcpts = str(",".join(rcp_list))
     return rcpts
 
